@@ -1,4 +1,4 @@
-module github.com/rebay1982/gosquitto
+module github.com/rebay1982/thg
 
 go 1.20
 
