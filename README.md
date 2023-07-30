@@ -2,48 +2,69 @@
 Temperature and Hygrometer IoT project.
 
 
-
 # Setup, installation, and configuration
+The initial intention was to use docker for both the MQTT broker and InfluxDB but the only Raspberry Pi that was laying
+around was an original B+. Resources were quite limited. On top of having limited resources, the majority of the
+services needed for the project have long moved on from the old `armhf` 32bit architecture.
 
-The initial intention was to use docker for both the MQTT broker and InfluxDB but the only Raspberry Pi I had on hand
-was an original B+ so resources are quite limited.
-
-## Docker
-The ideal situation would be to run everything as docker containers so that a rebuild/reconfiguration can be done 
-easily and quickly.
+This made everything an uphill battle so after some thought, the decision to replace the Raspberry Pi with something
+else was made. The rational is that the project isn't about cross platform compilation and making things work on an
+obsolete architecture. The Raspberry Pi B+ was replaced with a Trigkey S5 5500U mini PC sporting a widely supported
+`x86_64` architecture along with a hefty upgrade in resources and potential at a relatively low price.
 
 
-### Installation
-Installation on the Raspberry Pi is relatively straight forward, though there are doubts a first gen B+ Raspberry Pi 
-has the horse power to run multiple things under docker.
+## OS Installation
+The original idea was running the Rapsberry Pi as a headless server. This hasn't changed after moving on to the new 
+mini PC. Archlinux was chosen as the prime candidate for a barebones console-only installation.
 
-Installation through the basic installation script. This will figure out the details about the platform and install
-all the necessary components for you.
-```
-curl -sSL https://get.docker.com | sh
-```
+1. Install Archlinux by following the Arch Wiki documentation.
+2. Install SSH, configure it to only work public key authentication, and
+[harden](https://www.ssh-audit.com/hardening_guides.html) it.
+3. Install Avahi with the `nss-mdns` plugin to make the server discoverable on the local network.
+4. Install Docker engine and docker-compose (might come in handy later).
+
+This is a living section of the document. As more services are installed, steps will be added to it. A good candidate
+for addition would be Kubernetes if the need for an orchestrator comes up (or simply to play around it with it). These
+steps aren't specific to thet project, but lay down the foundations for the infrastructure on which the project with 
+run.
+
 
 ## Mosquitto
-Mosquitto will be the message broker, receiving data from pusblishers (ESP8266/DTH11) and writting that information
-into a data store (InfluxDB for now).
+Mosquitto will be the message broker, receiving data from publishers (ESP8266/DTH11) and making them available to
+subscribers to consume. It's pretty light weight and well suited for IoT integrations.
 
-To install on a RaspberryPi, follow this
-(guide)[https://randomnerdtutorials.com/how-to-install-mosquitto-broker-on-raspberry-pi/].
+The Eclipse Foundation maintains a Docker image for Mosquitto, making it super convenient to run the broker as a
+container. See the details [here](https://hub.docker.com/_/eclipse-mosquitto/).
 
-In essence, run the following to install and configure with remote privileges.
+
+### Installing
+Fetch the latest image with
 ```
-sudo apt update && sudo apt upgrade                 # Update apt.
-sudo apt install -y mosquitto mosquitto-clients     # Install packages.
-sudo systemctl enable mosquitto.service             # Enable Mosquitto broker service.
+docker pull eclipse-mosquitto
 ```
+
+
+### Running
+Run the container with the `-v <conf_file>:/mosquitto/config/mosquitto.conf` parametter to provide a customized 
+configuration file.
+
+
+### Authenticated access to the broker
+**WIP**
+Enabling authenticated access to the broker might be a bit more complicated than running it natively. I will have to
+look into this.
 
 To configure remote access with authentication, run the following replacing USERNAME with a user name of your choosing.
 ```
 sudo mosquitto_passwd -c /etc/mosquitto/passwd <USERNAME>
 ```
 
-Then edit the `/etc/mosquitto/mosquitto.conf` configuration file to prevent anonymous remote access. Add the following
-to the absolute top of the file:
+
+### Configuring
+As discussed above, configuration is done by providing the mosquitto.conf file as a parameter to the run command. The
+basic configuration is described in this section.
+
+This should be added to the absolute top of the file:
 ```
 per_listener_settings true
 ```
@@ -54,14 +75,13 @@ allow_anonymous false
 listener 1883
 password_file /etc/mosquitto/passwd
 ```
+It prevents anonymous access to the broker, sets the MTTQ listener to port `1883`, and specifies the authentication
+file to use. See the [Authenticated accesss to the broker](#authenticated-access-to-the-broker) section for more
+details on setting this up.
 
-Restart the service and validate the status:
-```
-sudo systemctl restart mosquitto.service
-sudo systemctl status mosquitto.service
-```
 
 ## InfluxDB
+**WIP**
 The initial idea was to run InfluxDB in a docker container. Unfortunately, there is no image based for the 
 `linux/arm/v6` architecture. It will not be possible to go down this route (easily).
 
