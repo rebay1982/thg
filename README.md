@@ -30,55 +30,7 @@ run.
 
 
 ## Mosquitto
-Mosquitto will be the message broker, receiving data from publishers (ESP8266/DTH11) and making them available to
-subscribers to consume. It's pretty light weight and well suited for IoT integrations.
-
-The Eclipse Foundation maintains a Docker image for Mosquitto, making it super convenient to run the broker as a
-container. See the details [here](https://hub.docker.com/_/eclipse-mosquitto/).
-
-
-### Installing
-Fetch the latest image with
-```
-docker pull eclipse-mosquitto
-```
-
-
-### Running
-Run the container with the `-v <conf_file>:/mosquitto/config/mosquitto.conf` parametter to provide a customized 
-configuration file.
-
-
-### Authenticated access to the broker
-**WIP**
-Enabling authenticated access to the broker might be a bit more complicated than running it natively. I will have to
-look into this.
-
-To configure remote access with authentication, run the following replacing USERNAME with a user name of your choosing.
-```
-sudo mosquitto_passwd -c /etc/mosquitto/passwd <USERNAME>
-```
-
-
-### Configuring
-As discussed above, configuration is done by providing the mosquitto.conf file as a parameter to the run command. The
-basic configuration is described in this section.
-
-This should be added to the absolute top of the file:
-```
-per_listener_settings true
-```
-
-and the following block at the end of the file:
-```
-allow_anonymous false
-listener 1883
-password_file /etc/mosquitto/passwd
-```
-It prevents anonymous access to the broker, sets the MTTQ listener to port `1883`, and specifies the authentication
-file to use. See the [Authenticated accesss to the broker](#authenticated-access-to-the-broker) section for more
-details on setting this up.
-
+See the README.md file under `./mosquitto`.
 
 ## InfluxDB
 **WIP**

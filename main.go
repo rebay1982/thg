@@ -13,10 +13,12 @@ var h MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 	fmt.Printf("  MSG: %s\n", msg.Payload())
 }
 
+var hostname string
 var username string
 var password string
 
 func initFlags() {
+	flag.StringVar(&hostname, "host", "localhost", "Hostname of the running Mosquitto broker")
 	flag.StringVar(&username, "username", "", "Username for authentication against the broker")
 	flag.StringVar(&password, "password", "", "Password for authentication against the broker")
 
@@ -29,7 +31,7 @@ func main() {
 
 	fmt.Println("[+] Setting up connection options")
 
-	opts := MQTT.NewClientOptions().AddBroker("tcp://raspberrypi.local:1883")
+	opts := MQTT.NewClientOptions().AddBroker(fmt.Sprintf("tcp://%s:1883", hostname))
 	opts.SetClientID("gosquitto")
 	opts.SetDefaultPublishHandler(h)
 
