@@ -19,7 +19,7 @@ docker run \
 -it -d \
 --name influxdb \
 -p 8086:8086 \
---volume <influxdb data path>:/var/lib/influxd2 \
+--volume <influxdb data path>:/var/lib/influxdb2 \
 influxdb:2.7.0
 ```
 
