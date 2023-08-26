@@ -6,6 +6,7 @@ import (
 	"flag"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 
+	"math/rand"
 	"time"
 	"log"
 	"context"
@@ -79,10 +80,7 @@ func testMQTT() {
 	c.Disconnect(250)
 }
 
-
-
-func main() {
-
+func doInflux() {
 	// Initialize a client to InfluxDB
 	token := os.Getenv("INFLUXDB_TOKEN")
 	url := "http://thoth.local:8086"
@@ -109,10 +107,10 @@ func main() {
 					"field1": value,
 				}
 
-				point := write.NewPoint("measurement1", tags, fields, time.Now())
+				temperature := write.NewPoint("measurement1", tags, fields, time.Now())
 				time.Sleep(1 * time.Second)
 
-				if err := writeAPI.WritePoint(context.Background(), point); err != nil {
+				if err := writeAPI.WritePoint(context.Background(), temperature); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -120,7 +118,7 @@ func main() {
 		fmt.Println("[+] Done writing...")
 	}
 
-	
+	// FETCH DATA FROM INFLUX
 	fmt.Println("[+] Waiting...")
 	time.Sleep(5 * time.Second)
 
@@ -163,4 +161,48 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println("[+] Done querying the DB (aggregate)")
+
+
+}
+
+func main() {
+
+	// doInflux()
+	// Initialize a client to InfluxDB
+	token := os.Getenv("INFLUXDB_TOKEN")
+	url := "http://thoth.local:8086"
+	client := influxdb2.NewClient(url, token)
+
+
+	org := "THG"
+	bucket := "Test"
+	writeAPI := client.WriteAPIBlocking(org, bucket)
+
+	writeNewData := true
+	rand.Seed(time.Now().UnixNano())
+	for writeNewData {
+		for sensorId := 0; sensorId < 5; sensorId++ {
+			tags := map[string]string {
+				"sensor_id": strconv.Itoa(sensorId),
+			}
+
+			// Get random value between 20 and 25
+			temp := rand.Intn(5) + 20
+			hg := rand.Intn(3) + 45
+			fields := map[string]interface{} {
+				"temperature": temp,
+				"humidity": hg,
+			}
+
+			point := write.NewPoint("thg_measurement", tags, fields, time.Now())
+			t := time.Now()
+			if err := writeAPI.WritePoint(context.Background(), point); err != nil {
+				log.Fatal(err)
+			} else {
+				fmt.Printf("%s >>> Wrote measurement (temp: %d, hg: %d) for sensor %d\n", t.Format(time.DateTime), temp, hg, sensorId)
+			}
+		}
+
+		time.Sleep(30 * time.Second)
+	}
 }
