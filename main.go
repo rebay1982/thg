@@ -35,16 +35,6 @@ func initFlags() {
 	flag.Parse()
 }
 
-func produce(client MQTT.Client) {
-	fmt.Println("[+] Producing stuff")
-	for i := 0; i < 5; i++ {
-		msg := fmt.Sprintf("this is msg #%d", i)
-		token := client.Publish("gosquitto/test", 0, false, msg)
-		token.Wait()
-	}
-	fmt.Println("[+] Done...")
-}
-
 func testMQTT() {
 	fmt.Println("[+] Parsing command line flags.")
 	initFlags()
@@ -165,8 +155,7 @@ func doInflux() {
 
 }
 
-func main() {
-
+func previousStuff() {
 	// doInflux()
 	// Initialize a client to InfluxDB
 	token := os.Getenv("INFLUXDB_TOKEN")
@@ -205,4 +194,38 @@ func main() {
 
 		time.Sleep(30 * time.Second)
 	}
+}
+
+func produce(client MQTT.Client) {
+	fmt.Println("[+] Producing stuff")
+	payload := `{"timestamp": %d, "sensor_id": "test_sensor", "temperature": 25.%d, "humidity": 4%d.0}`
+
+	for i := 0; i < 5; i++ {
+		msg := fmt.Sprintf(payload, time.Now().Unix(), i, i)
+		fmt.Println(msg)
+		time.Sleep(1*time.Second)
+		token := client.Publish("thg/test-topic", 0, false, msg)
+		token.Wait()
+	}
+	fmt.Println("[+] Done...")
+}
+
+func main() {
+	initFlags()
+	fmt.Println("[+] Setting up connection options")
+
+	opts := MQTT.NewClientOptions().AddBroker(fmt.Sprintf("tcp://%s:1883", hostname))
+	opts.SetClientID("gosquitto")
+
+	opts.SetUsername(username)
+	opts.SetPassword(password)
+
+	c := MQTT.NewClient(opts)
+	if token := c.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	}
+
+	produce(c)
+
+	c.Disconnect(250)
 }
