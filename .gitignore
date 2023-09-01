@@ -21,3 +21,6 @@ sink
 
 # Go workspace file
 go.work
+
+# Configurations
+thgsink/config/
