@@ -15,7 +15,6 @@ import (
 	"github.com/influxdata/influxdb-client-go/v2/api/write"
 )
 
-
 // MQTT STUFFZ
 var h MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 	fmt.Println("*** Received Message ***")
