@@ -7,16 +7,16 @@ import (
 func Test_MQTTSink(t *testing.T) {
 	t.Run("getClientOptions", func(t *testing.T) {
 		mqttSink := new(MQTTSink)
-		config := MQTTConfig {
-			Hostname: "www.test.com",
-			Topic: "test/topic"
+		config := MQTTConfig{
+			Hostname:   "www.test.com",
+			Topic:      "test/topic",
 			ClientName: "MQTT Test Client",
-			Username: "user",
-			Password: "password",
+			Username:   "user",
+			Password:   "password",
 		}
 
 		opts := mqttSink.getClientOptions(config)
-		
+
 		if opts.ClientID != "MQTT Test Client" {
 			t.Errorf("Failed client name validation. Got %s, want %s", opts.ClientID, "MQTT Test Client")
 		}

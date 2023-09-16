@@ -7,14 +7,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	thgapi "github.com/rebay1982/thg/thgsink/api"
-	"github.com/rebay1982/thg/thgsink/internal/sink"
-	"github.com/rebay1982/thg/thgsink/internal/persistence"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	thgapi "github.com/rebay1982/thg/thgsink/api"
+	"github.com/rebay1982/thg/thgsink/internal/persistence"
+	"github.com/rebay1982/thg/thgsink/internal/sink"
 )
 
 // getenv Tool to allow fallback values when retrieving environment variables.
-func getenv(key, fallback string) (string) {
+func getenv(key, fallback string) string {
 	value := os.Getenv(key)
 	if len(value) > 0 {
 		return value
@@ -24,23 +24,24 @@ func getenv(key, fallback string) (string) {
 
 func getConfigurations() (persistence.InfluxConfig, sink.MQTTConfig) {
 	persistConfig := persistence.InfluxConfig{
-		Token: getenv("THG_INFLUXDB_WRITE_TOKEN", ""),
-		Url: getenv("THG_INFLUXDB_URL", ""),
-		Org: getenv("THG_INFLUXDB_ORGANIZATION", ""),
+		Token:  getenv("THG_INFLUXDB_WRITE_TOKEN", ""),
+		Url:    getenv("THG_INFLUXDB_URL", ""),
+		Org:    getenv("THG_INFLUXDB_ORGANIZATION", ""),
 		Bucket: getenv("THG_INFLUXDB_BUCKET", ""),
 	}
 	sinkConfig := sink.MQTTConfig{
-		Hostname: getenv("THG_MQTT_HOSTNAME", ""),
-		Topic: getenv("THG_MQTT_TOPIC", ""),
+		Hostname:   getenv("THG_MQTT_HOSTNAME", ""),
+		Topic:      getenv("THG_MQTT_TOPIC", ""),
 		ClientName: getenv("THG_MQTT_CLIENT_NAME", ""),
-		Username: getenv("THG_MQTT_USER", ""),
-		Password: getenv("THG_MQTT_PASS", ""),
+		Username:   getenv("THG_MQTT_USER", ""),
+		Password:   getenv("THG_MQTT_PASS", ""),
 	}
 
 	return persistConfig, sinkConfig
 }
 
 var influxPersister *persistence.InfluxPersister
+
 func mqttMessageHandler(client mqtt.Client, msg mqtt.Message) {
 	jsonPayload := msg.Payload()
 	var measurement thgapi.THGMeasurement
@@ -62,7 +63,7 @@ func main() {
 	mqttSink := sink.NewMQTTSink(sinkConfig)
 
 	// Connect sink client
-	if err :=	mqttSink.ConnectClient(); err != nil {
+	if err := mqttSink.ConnectClient(); err != nil {
 		log.Printf("Unable to connect MQTT client:\n%v", err)
 		os.Exit(1)
 	}

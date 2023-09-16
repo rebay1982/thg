@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"time"
-	"log"
 
 	thgapi "github.com/rebay1982/thg/thgsink/api"
 
@@ -13,24 +12,24 @@ import (
 
 // InfluxConfig struct containing necessary configurations to instanciate an InfluxDB2 client and an async write API.
 type InfluxConfig struct {
-	Token string
-	Url string
-	Org string
+	Token  string
+	Url    string
+	Org    string
 	Bucket string
 }
 
 type InfluxPersister struct {
-	writeAPI api.WriteAPI 
+	writeAPI api.WriteAPI
 }
 
 // NewInfluxPersister Method to create a new InfluxPersister, used to write data points to InfluxDB.
-func NewInfluxPersister(config InfluxConfig) (*InfluxPersister) {
+func NewInfluxPersister(config InfluxConfig) *InfluxPersister {
 	client := influxdb2.NewClient(config.Url, config.Token)
 
 	influxPersister := new(InfluxPersister)
 	influxPersister.writeAPI = client.WriteAPI(config.Org, config.Bucket)
 
-	return influxPersister 
+	return influxPersister
 }
 
 // WriteTHGData Method receives a THGMeasurement data structure and persists it to InfluxDB.
@@ -46,12 +45,13 @@ func (p InfluxPersister) unpackMeasurement(data thgapi.THGMeasurement) (
 	measurement string, tags map[string]string, fields map[string]interface{}) {
 
 	measurement = "thg_measurement"
-	tags = map[string]string {
+	tags = map[string]string{
 		"sensor_id": data.Sensor,
 	}
 
-	fields = map[string]interface{} {
+	fields = map[string]interface{}{
 		"temperature": data.Temperature,
-		"humidity": data.Humidity,
+		"humidity":    data.Humidity,
 	}
+	return measurement, tags, fields
 }
