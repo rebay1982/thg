@@ -1,3 +1,4 @@
+# build with 'docker buildx build .'
 FROM golang:alpine AS build
 
 WORKDIR /app
