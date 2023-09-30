@@ -1,4 +1,4 @@
-# build with 'docker buildx build .'
+# build with 'docker buildx build -t thgsink:latest.'
 FROM golang:alpine AS build
 
 WORKDIR /app
