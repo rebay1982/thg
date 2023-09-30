@@ -15,3 +15,6 @@ vet: fmt
 
 build: vet
 	go build ./cmd/sink 
+
+docker-build:
+	sudo docker buildx build -t thgsink:latest .
