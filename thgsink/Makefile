@@ -18,3 +18,6 @@ build: vet
 
 docker-build:
 	sudo docker buildx build -t thgsink:latest .
+
+docker-push: docker-build
+	sudo docker push rebay1982/thgsink:latest
