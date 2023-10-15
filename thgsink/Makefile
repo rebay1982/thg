@@ -3,6 +3,8 @@
 .PHONY:lint
 .PHONY:vet
 .PHONY:build
+.PHONY:docker-build
+.PHONY:docker-push
 
 fmt:
 	go fmt ./...
@@ -16,7 +18,10 @@ vet: fmt
 build: vet
 	go build ./cmd/sink 
 
-docker-build:
+test: build
+	go test ./...
+
+docker-build: test
 	sudo docker buildx build -t thgsink:latest .
 
 docker-push: docker-build

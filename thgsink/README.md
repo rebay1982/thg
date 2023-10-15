@@ -26,8 +26,16 @@ These need to be configured in an environment file and passed along to the `--en
 If you want to build your own image or version, it is possible to do so by using the provided `Makefile` and use
 the `docker-build` target.
 
+If you want to build from source without building the docker image, you can use the `build` target. You can also run
+local unit tests using the `test` target.
 
 ## Running
 
-Run the `thgsink` container using the following command and also providing the necessary configuration file:
+Although this project was meant to run in a container, there is nothing preventing it from being run natively.
+Environment variables will still need to be set prior to running the binary.
+
+To run using docker, the docker image can either be built locally or pulled from the `rebay1982` repo as
+`thgsink:latest`.
+
+Run the `thgsink` container using the following command while also providing the necessary environment file.
 `docker run -it -d --name thgsink --env-file <path_to_env_file> rebay1982/thgsink:latest`
