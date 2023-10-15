@@ -9,4 +9,4 @@ RUN go mod download
 COPY ./ ./
 RUN CGO_ENABLED=0 GOOS=linux go build ./cmd/sink 
 
-CMD ["sink"]
+CMD ["/app/sink"]
