@@ -18,16 +18,16 @@ The project requires configuration of eight environment variables:
 `THG_MQTT_USER` The configured MQTT user name.
 `THG_MQTT_PASS` The confgured MQTT password.
 
-These need to be configured in a configuration file and used as a volume to the `/thgsink/thgsink.conf` file.
+These need to be configured in an environment file and passed along to the `--env-file` when starting the container.
 
 
 ## Building
 
-If you want to build your own image or version, it is possible to do so by using the provided Makefile and use
+If you want to build your own image or version, it is possible to do so by using the provided `Makefile` and use
 the `docker-build` target.
 
 
 ## Running
 
 Run the `thgsink` container using the following command and also providing the necessary configuration file:
-`docker run -it -d --name thgsink -v ./config/thgsink.conf:/thgsink/thgsink.conf rebay1982/thgsink:latest`
+`docker run -it -d --name thgsink --env-file <path_to_env_file> rebay1982/thgsink:latest`
