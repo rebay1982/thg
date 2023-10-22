@@ -5,6 +5,7 @@
 .PHONY:build
 .PHONY:docker-build
 .PHONY:docker-push
+.PHONY:docker-run
 
 fmt:
 	go fmt ./...
@@ -26,3 +27,6 @@ docker-build: test
 
 docker-push: docker-build
 	sudo docker push rebay1982/thgsink:latest
+
+docker-run: docker-build
+	sudo docker run  -it -d --name=thgsink --network=host --env-file ./config/sink.env thgsink:latest
