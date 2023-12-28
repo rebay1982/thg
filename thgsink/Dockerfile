@@ -1,5 +1,5 @@
 # build with 'docker buildx build -t thgsink:latest.'
-FROM golang:alpine AS build
+FROM golang:bookworm AS build
 
 WORKDIR /app
 
@@ -7,6 +7,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY ./ ./
-RUN CGO_ENABLED=0 GOOS=linux go build ./cmd/sink 
+RUN GOOS=linux go build -tags=musl ./cmd/sink 
 
-CMD ["/app/sink"]
+RUN apt update
+# RUN apt install strace
+
+CMD ["/bin/sh"]

@@ -2,15 +2,18 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	thgapi "github.com/rebay1982/thg/thgsink/api"
+	"github.com/rebay1982/thg/thgsink/internal/persistence"
+	"github.com/rebay1982/thg/thgsink/internal/sink"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
-	thgapi "github.com/rebay1982/thg/thgsink/api"
-	"github.com/rebay1982/thg/thgsink/internal/persistence"
-	"github.com/rebay1982/thg/thgsink/internal/sink"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	//influxdb2 "github.com/rebay1982/thg/thgsink/influxdb/v2"
 )
 
 // getenv Tool to allow fallback values when retrieving environment variables.
@@ -57,31 +60,47 @@ func main() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
 
-	// Initialize configuration, persister, and sink
-	persistConfig, sinkConfig := getConfigurations()
-	influxPersister = persistence.NewInfluxPersister(persistConfig)
-	mqttSink := sink.NewMQTTSink(sinkConfig)
+	//	u, err := url.Parse("../../..//search?q=dotnet")
+	//  if err != nil {
+	//      log.Fatal(err)
+	//  }
+	//  base, err := url.Parse("http://example.com/directory/")
+	//  if err != nil {
+	//      log.Fatal(err)
+	//  }
+	//  fmt.Println(u.Parse("write"))
+	//  fmt.Println(base.Parse("write"))
+	config, _ := getConfigurations()
+	client := influxdb2.NewClient(config.Url, config.Token)
+	log.Println(client.ServerURL())
+	fmt.Println("Pet....")
+	client.WriteAPIBlocking(config.Org, config.Bucket)
 
-	// Connect sink client
-	if err := mqttSink.ConnectClient(); err != nil {
-		log.Printf("Unable to connect MQTT client:\n%v", err)
-		os.Exit(1)
-	}
-
-	// Subscribe sink to topic
-	if err := mqttSink.Subscribe(sinkConfig.Topic, mqttMessageHandler); err != nil {
-		log.Printf("Unable to subscribe to MQTT topic %s:\n%v", sinkConfig.Topic, err)
-		os.Exit(1)
-	}
+	//	// Initialize configuration, persister, and sink
+	//	persistConfig, sinkConfig := getConfigurations()
+	//	influxPersister = persistence.NewInfluxPersister(persistConfig)
+	//	mqttSink := sink.NewMQTTSink(sinkConfig)
+	//
+	//	// Connect sink clientdebian:bookworm
+	//	if err := mqttSink.ConnectClient(); err != nil {
+	//		log.Printf("Unable to connect MQTT client:\n%v", err)
+	//		os.Exit(1)
+	//	}
+	//
+	//	// Subscribe sink to topic
+	//	if err := mqttSink.Subscribe(sinkConfig.Topic, mqttMessageHandler); err != nil {
+	//		log.Printf("Unable to subscribe to MQTT topic %s:\n%v", sinkConfig.Topic, err)
+	//		os.Exit(1)
+	//	}
 
 	log.Println("Listening for messages...")
 	sig := <-sigs
 
 	log.Printf("Gracefully exiting after receiving %v\n", sig)
-	if err := mqttSink.Unsubscribe(sinkConfig.Topic); err != nil {
-		log.Printf("Unable to ubsubrcrube from MQTT topic %s:\n%v", sinkConfig.Topic, err)
-	}
-	mqttSink.DisconnectClient()
+	//	if err := mqttSink.Unsubscribe(sinkConfig.Topic); err != nil {
+	//		log.Printf("Unable to ubsubrcrube from MQTT topic %s:\n%v", sinkConfig.Topic, err)
+	//	}
+	//	mqttSink.DisconnectClient()
 
 	log.Println("Exited.")
 }

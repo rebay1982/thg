@@ -29,4 +29,4 @@ docker-push: docker-build
 	sudo docker push rebay1982/thgsink:latest
 
 docker-run: docker-build
-	sudo docker run  -it -d --name=thgsink --network=host --env-file ./config/sink.env thgsink:latest
+	sudo docker run --cap-add=ALL -it -d --name=thgsink --network=host --env-file ./config/sink.env thgsink:latest
