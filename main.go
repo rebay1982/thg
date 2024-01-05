@@ -204,7 +204,7 @@ func produce(client MQTT.Client) {
 		msg := fmt.Sprintf(payload, time.Now().Unix(), i, i)
 		fmt.Println(msg)
 		time.Sleep(1*time.Second)
-		token := client.Publish("thg/test-topic", 0, false, msg)
+		token := client.Publish("thg/thg-data", 0, false, msg)
 		token.Wait()
 	}
 	fmt.Println("[+] Done...")
