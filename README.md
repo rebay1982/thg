@@ -42,4 +42,4 @@ See the README.md file under `./grafana`.
 See the README.md file under `./arduino`.
 
 ## Sink service (Go)
-See the README.md file under `.thgsink`
+See the README.md file under `./thgsink`
