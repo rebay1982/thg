@@ -37,3 +37,9 @@ See the README.md file under `./influxdb`.
 
 ## Grafana
 See the README.md file under `./grafana`.
+
+## ESP8266 / Temperature and Humidity probe
+See the README.md file under `./arduino`.
+
+## Sink service (Go)
+See the README.md file under `.thgsink`
