@@ -26,7 +26,7 @@ published as follows.
 
 ```
 "time": <...>
-"meausrement": "thg_measurement",
+"measurement": "thg_measurement",
 "tags": {
     "sensor_id": <...>
 },

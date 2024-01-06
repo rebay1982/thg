@@ -15,7 +15,7 @@ The data published follows the following JSON format:
 ```
 
 ## Building
-Building the project requires installing Arduino IDE, and the required libraries for MQTT, NTPClient, and the DHT
+Building the project requires installing Arduino IDE and the required libraries for MQTT, NTPClient, and the DHT
 sensor.
 
 [Random Nerd Tutorials](https://randomnerdtutorials.com/getting-started-with-esp8266-wifi-transceiver-review/) contains
