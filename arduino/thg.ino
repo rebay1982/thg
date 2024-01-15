@@ -100,5 +100,5 @@ void loop() {
   Serial.println(buffer);
   
   mqttClient.publish(MQTT_PUB_TOPIC, 0, false, buffer);
-  delay(10000);
+  delay(60000);
 }
