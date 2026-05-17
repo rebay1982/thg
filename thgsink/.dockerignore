@@ -1,0 +1,7 @@
+.git
+.gitignore
+Dockerfile
+Dockerfile.dev
+sink
+config/thgsink
+*.log

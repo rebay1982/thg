@@ -1,0 +1,63 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/passwd:/mosquitto/config/passwd:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+
+  influxdb:
+    image: influxdb:2.7
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    healthcheck:
+      test: ["CMD", "influx", "ping", "--host", "http://localhost:8086"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - influxdb
+
+  thgsink:
+    build:
+      context: ./thgsink
+    image: thgsink:latest
+    restart: unless-stopped
+    environment:
+      THG_INFLUXDB_WRITE_TOKEN: ${THG_INFLUXDB_WRITE_TOKEN:?Set THG_INFLUXDB_WRITE_TOKEN}
+      THG_INFLUXDB_URL: http://influxdb:8086
+      THG_INFLUXDB_ORGANIZATION: ${THG_INFLUXDB_ORGANIZATION:-THG}
+      THG_INFLUXDB_BUCKET: ${THG_INFLUXDB_BUCKET:-THG}
+      THG_MQTT_HOSTNAME: mosquitto
+      THG_MQTT_TOPIC: ${THG_MQTT_TOPIC:-thg/thg-data}
+      THG_MQTT_CLIENT_NAME: ${THG_MQTT_CLIENT_NAME:-thg-sink-client}
+      THG_MQTT_USER: ${THG_MQTT_USER:?Set THG_MQTT_USER}
+      THG_MQTT_PASS: ${THG_MQTT_PASS:?Set THG_MQTT_PASS}
+    depends_on:
+      mosquitto:
+        condition: service_started
+      influxdb:
+        condition: service_healthy
+
+volumes:
+  mosquitto-data:
+  mosquitto-log:
+  influxdb-data:
+  influxdb-config:
+  grafana-data:

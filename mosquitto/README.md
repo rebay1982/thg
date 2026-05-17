@@ -63,6 +63,3 @@ Once the password file is generated and configuration is setup, run the image wi
 ```
 docker run -it -d --name mosquitto -p 1883:1883 -p 9001:9001 -v ./mosquitto.conf:/mosquitto/config/mosquitto.conf -v ./passwd:/mosquitto/config/passwd eclipse-mosquitto:latest
 ```
-
-## Docker Compose
-WIP: Provide a docker-compose file to fire everything up.
