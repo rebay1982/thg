@@ -19,6 +19,7 @@ type InfluxConfig struct {
 }
 
 type InfluxPersister struct {
+	client   influxdb2.Client
 	writeAPI api.WriteAPI
 }
 
@@ -26,7 +27,8 @@ type InfluxPersister struct {
 func NewInfluxPersister(config InfluxConfig) *InfluxPersister {
 	client := influxdb2.NewClient(config.Url, config.Token)
 
-	influxPersister := new(InfluxPersister)
+	influxPersister := &InfluxPersister{}
+	influxPersister.client = client
 	influxPersister.writeAPI = client.WriteAPI(config.Org, config.Bucket)
 
 	return influxPersister
@@ -38,20 +40,26 @@ func (p *InfluxPersister) WriteTHGData(data thgapi.THGMeasurement) {
 
 	measurementTime := time.Unix(data.Timestamp, 0).UTC()
 	point := write.NewPoint(measurement, tags, fields, measurementTime)
+
+	// Errors are voluntarily ignored as data points are not cconsidered critical data.
 	p.writeAPI.WritePoint(point)
 }
 
 func (p InfluxPersister) unpackMeasurement(data thgapi.THGMeasurement) (
-	measurement string, tags map[string]string, fields map[string]interface{}) {
+	measurement string, tags map[string]string, fields map[string]any) {
 
 	measurement = "thg_measurement"
 	tags = map[string]string{
 		"sensor_id": data.Sensor,
 	}
 
-	fields = map[string]interface{}{
+	fields = map[string]any{
 		"temperature": data.Temperature,
 		"humidity":    data.Humidity,
 	}
 	return measurement, tags, fields
+}
+
+func (p *InfluxPersister) Close() {
+	p.client.Close()
 }

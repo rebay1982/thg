@@ -48,9 +48,9 @@ func mqttMessageHandler(client mqtt.Client, msg mqtt.Message) {
 
 	if err := json.Unmarshal([]byte(jsonPayload), &measurement); err != nil {
 		log.Printf("Failed to unmarshall json payload into measurement: %s", jsonPayload)
+	} else {
+		influxPersister.WriteTHGData(measurement)
 	}
-
-	influxPersister.WriteTHGData(measurement)
 }
 
 func main() {
@@ -77,11 +77,13 @@ func main() {
 	log.Println("Listening for messages...")
 	sig := <-sigs
 
+	// --- SHUTDOWN ---
 	log.Printf("Gracefully exiting after receiving %v\n", sig)
 	if err := mqttSink.Unsubscribe(sinkConfig.Topic); err != nil {
 		log.Printf("Unable to ubsubrcrube from MQTT topic %s:\n%v", sinkConfig.Topic, err)
 	}
 	mqttSink.DisconnectClient()
+	influxPersister.Close()
 
 	log.Println("Exited.")
 }

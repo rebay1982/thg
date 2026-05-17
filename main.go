@@ -1,20 +1,19 @@
-package main 
+package main
 
 import (
-	"fmt"
-	"os"
 	"flag"
+	"fmt"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"os"
 
-	"math/rand"
-	"time"
-	"log"
 	"context"
-	"strconv"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api/write"
+	"log"
+	"math/rand"
+	"strconv"
+	"time"
 )
-
 
 // MQTT STUFFZ
 var h MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
@@ -76,11 +75,9 @@ func doInflux() {
 	url := "http://thoth.local:8086"
 	client := influxdb2.NewClient(url, token)
 
-
 	org := "THG"
 	bucket := "Test"
 	writeAPI := client.WriteAPIBlocking(org, bucket)
-
 
 	writeNewData := false
 
@@ -89,11 +86,11 @@ func doInflux() {
 		for sensorId := 0; sensorId < 5; sensorId++ {
 			fmt.Printf("  [+] Writing data for sensor %d\n", sensorId)
 			for value := 0; value < 5; value++ {
-				tags := map[string]string {
+				tags := map[string]string{
 					"sensor": strconv.Itoa(sensorId),
 				}
 
-				fields := map[string]interface{} {
+				fields := map[string]any{
 					"field1": value,
 				}
 
@@ -130,8 +127,6 @@ func doInflux() {
 	}
 	fmt.Println("[+] Done querying the DB (single)")
 
-
-
 	fmt.Println("[+] Waiting...")
 	time.Sleep(5 * time.Second)
 
@@ -152,7 +147,6 @@ func doInflux() {
 	}
 	fmt.Println("[+] Done querying the DB (aggregate)")
 
-
 }
 
 func previousStuff() {
@@ -162,7 +156,6 @@ func previousStuff() {
 	url := "http://thoth.local:8086"
 	client := influxdb2.NewClient(url, token)
 
-
 	org := "THG"
 	bucket := "Test"
 	writeAPI := client.WriteAPIBlocking(org, bucket)
@@ -171,16 +164,16 @@ func previousStuff() {
 	rand.Seed(time.Now().UnixNano())
 	for writeNewData {
 		for sensorId := 0; sensorId < 5; sensorId++ {
-			tags := map[string]string {
+			tags := map[string]string{
 				"sensor_id": strconv.Itoa(sensorId),
 			}
 
 			// Get random value between 20 and 25
 			temp := rand.Intn(5) + 20
 			hg := rand.Intn(3) + 45
-			fields := map[string]interface{} {
+			fields := map[string]any{
 				"temperature": temp,
-				"humidity": hg,
+				"humidity":    hg,
 			}
 
 			point := write.NewPoint("thg_measurement", tags, fields, time.Now())
@@ -203,7 +196,7 @@ func produce(client MQTT.Client) {
 	for i := 0; i < 5; i++ {
 		msg := fmt.Sprintf(payload, time.Now().Unix(), i, i)
 		fmt.Println(msg)
-		time.Sleep(1*time.Second)
+		time.Sleep(1 * time.Second)
 		token := client.Publish("thg/thg-data", 0, false, msg)
 		token.Wait()
 	}
